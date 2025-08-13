@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1RM Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-4">1RM Calculator</h1>
+    
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Exercise Name</label>
+        <input id="exercise" type="text" placeholder="e.g., Bench Press" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Reps</label>
+        <input id="reps" type="number" min="1" placeholder="Enter reps" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Weight (lbs)</label>
+        <input id="weight" type="number" min="0" step="0.1" placeholder="Enter weight" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Age (optional)</label>
+        <input id="age" type="number" min="0" placeholder="Enter age" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Height (inches, optional)</label>
+        <input id="height" type="number" min="0" step="0.1" placeholder="Enter height" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Body Weight (lbs, optional)</label>
+        <input id="bodyWeight" type="number" min="0" step="0.1" placeholder="Enter body weight" class="mt-1 w-full p-2 border rounded-md">
+      </div>
+      <button onclick="calculate1RM()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Calculate 1RM</button>
+    </div>
+    
+    <div id="result" class="mt-6 text-center"></div>
+  </div>
+
+  <script>
+    function calculate1RM() {
+      const exercise = document.getElementById('exercise').value.trim();
+      const reps = parseInt(document.getElementById('reps').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const age = parseInt(document.getElementById('age').value) || null;
+      const height = parseFloat(document.getElementById('height').value) || null;
+      const bodyWeight = parseFloat(document.getElementById('bodyWeight').value) || null;
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
+      // Input validation
+      if (!exercise || isNaN(reps) || isNaN(weight)) {
+        resultDiv.innerHTML = '<p class="text-red-600">Please fill in exercise, reps, and weight.</p>';
+        return;
+      }
+      if (reps < 1 || weight <= 0) {
+        resultDiv.innerHTML = '<p class="text-red-600">Reps must be ≥ 1 and weight > 0.</p>';
+        return;
+      }
+
+      // Calculate 1RM (Epley formula)
+      const oneRM = reps === 1 ? weight : weight * (1 + reps / 30);
+
+      // Basic comparison data (approximate strength standards)
+      let comparison = '';
+      if (bodyWeight && age) {
+        // Example standards for bench press, squat, deadlift (novice/intermediate levels)
+        const standards = {
+          'Bench Press': {
+            '<30': { novice: 0.75 * bodyWeight, intermediate: 1.25 * bodyWeight },
+            '30-50': { novice: 0.65 * bodyWeight, intermediate: 1.1 * bodyWeight },
+            '>50': { novice: 0.5 * bodyWeight, intermediate: 0.9 * bodyWeight }
+          },
+          'Squat': {
+            '<30': { novice: 1.0 * bodyWeight, intermediate: 1.75 * bodyWeight },
+            '30-50': { novice: 0.9 * bodyWeight, intermediate: 1.5 * bodyWeight },
+            '>50': { novice: 0.7 * bodyWeight, intermediate: 1.2 * bodyWeight }
+          },
+          'Deadlift': {
+            '<30': { novice: 1.25 * bodyWeight, intermediate: 2.0 * bodyWeight },
+            '30-50': { novice: 1.1 * bodyWeight, intermediate: 1.75 * bodyWeight },
+            '>50': { novice: 0.9 * bodyWeight, intermediate: 1.5 * bodyWeight }
+          }
+        };
+
+        const ageGroup = age < 30 ? '<30' : age <= 50 ? '30-50' : '>50';
+        const exerciseKey = ['Bench Press', 'Squat', 'Deadlift'].includes(exercise) ? exercise : 'Bench Press'; // Default to bench press
+        const standard = standards[exerciseKey][ageGroup];
+
+        if (oneRM < standard.novice) {
+          comparison = `Your 1RM is below novice level (${standard.novice.toFixed(1)} lbs) for your age and body weight.`;
+        } else if (oneRM < standard.intermediate) {
+          comparison = `Your 1RM is at novice level (${standard.novice.toFixed(1)} lbs) but below intermediate (${standard.intermediate.toFixed(1)} lbs) for your age and body weight.`;
+        } else {
+          comparison = `Your 1RM is at or above intermediate level (${standard.intermediate.toFixed(1)} lbs) for your age and body weight!`;
+        }
+      }
+
+      // Display result
+      resultDiv.innerHTML = `
+        <p><strong>Exercise:</strong> ${exercise}</p>
+        <p><strong>Reps:</strong> ${reps}</p>
+        <p><strong>Weight:</strong> ${weight} lbs</p>
+        <p><strong>Estimated 1RM:</strong> ${oneRM.toFixed(1)} lbs</p>
+        ${comparison ? `<p><strong>Comparison:</strong> ${comparison}</p>` : ''}
+      `;
+    }
+  </script>
+</body>
+</html>
