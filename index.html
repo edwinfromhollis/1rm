@@ -12,8 +12,13 @@
     
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700">Exercise Name</label>
-        <input id="exercise" type="text" placeholder="e.g., Bench Press" class="mt-1 w-full p-2 border rounded-md">
+        <label class="block text-sm font-medium text-gray-700">Exercise</label>
+        <select id="exercise" class="mt-1 w-full p-2 border rounded-md">
+          <option value="" disabled selected>Select an exercise</option>
+          <option value="Bench Press">Bench Press</option>
+          <option value="Deadlift">Deadlift</option>
+          <option value="Squat">Squat</option>
+        </select>
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700">Reps</label>
@@ -43,7 +48,7 @@
 
   <script>
     function calculate1RM() {
-      const exercise = document.getElementById('exercise').value.trim();
+      const exercise = document.getElementById('exercise').value;
       const reps = parseInt(document.getElementById('reps').value);
       const weight = parseFloat(document.getElementById('weight').value);
       const age = parseInt(document.getElementById('age').value) || null;
@@ -55,7 +60,7 @@
 
       // Input validation
       if (!exercise || isNaN(reps) || isNaN(weight)) {
-        resultDiv.innerHTML = '<p class="text-red-600">Please fill in exercise, reps, and weight.</p>';
+        resultDiv.innerHTML = '<p class="text-red-600">Please select an exercise and fill in reps and weight.</p>';
         return;
       }
       if (reps < 1 || weight <= 0) {
@@ -66,10 +71,9 @@
       // Calculate 1RM (Epley formula)
       const oneRM = reps === 1 ? weight : weight * (1 + reps / 30);
 
-      // Basic comparison data (approximate strength standards)
+      // Comparison data (approximate strength standards)
       let comparison = '';
       if (bodyWeight && age) {
-        // Example standards for bench press, squat, deadlift (novice/intermediate levels)
         const standards = {
           'Bench Press': {
             '<30': { novice: 0.75 * bodyWeight, intermediate: 1.25 * bodyWeight },
@@ -89,8 +93,7 @@
         };
 
         const ageGroup = age < 30 ? '<30' : age <= 50 ? '30-50' : '>50';
-        const exerciseKey = ['Bench Press', 'Squat', 'Deadlift'].includes(exercise) ? exercise : 'Bench Press'; // Default to bench press
-        const standard = standards[exerciseKey][ageGroup];
+        const standard = standards[exercise][ageGroup];
 
         if (oneRM < standard.novice) {
           comparison = `Your 1RM is below novice level (${standard.novice.toFixed(1)} lbs) for your age and body weight.`;
