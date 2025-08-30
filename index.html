@@ -12,8 +12,8 @@
     
     <div class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700">Exercise</label>
-        <select id="exercise" class="mt-1 w-full p-2 border rounded-md">
+        <label for="exercise" class="block text-sm font-medium text-gray-700">Exercise</label>
+        <select id="exercise" class="mt-1 w-full p-2 border rounded-md" aria-label="Exercise" required autocomplete="off">
           <option value="" disabled selected>Select an exercise</option>
           <option value="Bench Press">Bench Press</option>
           <option value="Deadlift">Deadlift</option>
@@ -21,50 +21,74 @@
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Reps</label>
-        <input id="reps" type="number" inputmode="numeric" min="1" placeholder="Enter reps" class="mt-1 w-full p-2 border rounded-md">
+        <label for="reps" class="block text-sm font-medium text-gray-700">Reps</label>
+        <input id="reps" type="number" inputmode="numeric" min="1" placeholder="Enter reps" class="mt-1 w-full p-2 border rounded-md" aria-label="Reps" required autocomplete="off">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Weight (lbs)</label>
-        <input id="weight" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter weight" class="mt-1 w-full p-2 border rounded-md">
+        <label for="weight" class="block text-sm font-medium text-gray-700">Weight (lbs)</label>
+        <input id="weight" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter weight" class="mt-1 w-full p-2 border rounded-md" aria-label="Weight" required autocomplete="off">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Age (optional)</label>
-        <input id="age" type="number" inputmode="numeric" min="0" placeholder="Enter age" class="mt-1 w-full p-2 border rounded-md">
+        <label for="age" class="block text-sm font-medium text-gray-700">Age (optional)</label>
+        <input id="age" type="number" inputmode="numeric" min="0" placeholder="Enter age" class="mt-1 w-full p-2 border rounded-md" aria-label="Age" autocomplete="off">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Height (inches, optional)</label>
-        <input id="height" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter height" class="mt-1 w-full p-2 border rounded-md">
+        <label for="height" class="block text-sm font-medium text-gray-700">Height (inches, optional)</label>
+        <input id="height" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter height" class="mt-1 w-full p-2 border rounded-md" aria-label="Height" autocomplete="off">
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700">Body Weight (lbs, optional)</label>
-        <input id="bodyWeight" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter body weight" class="mt-1 w-full p-2 border rounded-md">
+        <label for="bodyWeight" class="block text-sm font-medium text-gray-700">Body Weight (lbs, optional)</label>
+        <input id="bodyWeight" type="number" inputmode="numeric" min="0" step="0.1" placeholder="Enter body weight" class="mt-1 w-full p-2 border rounded-md" aria-label="Body Weight" autocomplete="off">
       </div>
-      <button onclick="calculate1RM()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">Calculate 1RM</button>
+      <button id="calcBtn" onclick="calculate1RM()" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700" aria-label="Calculate 1RM">Calculate 1RM</button>
     </div>
     
     <div id="result" class="mt-6 text-left"></div>
   </div>
 
   <script>
+    // Move script to bottom for better performance
     function calculate1RM() {
-      const exercise = document.getElementById('exercise').value;
-      const reps = parseInt(document.getElementById('reps').value);
-      const weight = parseFloat(document.getElementById('weight').value);
-      const age = parseInt(document.getElementById('age').value) || null;
-      const height = parseFloat(document.getElementById('height').value) || null;
-      const bodyWeight = parseFloat(document.getElementById('bodyWeight').value) || null;
-
+      const exerciseEl = document.getElementById('exercise');
+      const repsEl = document.getElementById('reps');
+      const weightEl = document.getElementById('weight');
+      const ageEl = document.getElementById('age');
+      const heightEl = document.getElementById('height');
+      const bodyWeightEl = document.getElementById('bodyWeight');
+      const calcBtn = document.getElementById('calcBtn');
       const resultDiv = document.getElementById('result');
+
+      // Disable button and show loading
+      calcBtn.disabled = true;
+      calcBtn.textContent = 'Calculating...';
+
+      // Get values
+      const exercise = exerciseEl.value;
+      const reps = Number(repsEl.value);
+      const weight = Number(weightEl.value);
+      const age = ageEl.value ? Number(ageEl.value) : null;
+      const height = heightEl.value ? Number(heightEl.value) : null;
+      const bodyWeight = bodyWeightEl.value ? Number(bodyWeightEl.value) : null;
+
       resultDiv.innerHTML = '';
 
       // Input validation
       if (!exercise || isNaN(reps) || isNaN(weight)) {
         resultDiv.innerHTML = '<p class="text-red-600">Please select an exercise and fill in reps and weight.</p>';
+        calcBtn.disabled = false;
+        calcBtn.textContent = 'Calculate 1RM';
         return;
       }
       if (reps < 1 || weight <= 0) {
         resultDiv.innerHTML = '<p class="text-red-600">Reps must be ≥ 1 and weight > 0.</p>';
+        calcBtn.disabled = false;
+        calcBtn.textContent = 'Calculate 1RM';
+        return;
+      }
+      if (reps > 100 || weight > 2000) {
+        resultDiv.innerHTML = '<p class="text-red-600">Please enter realistic values for reps and weight.</p>';
+        calcBtn.disabled = false;
+        calcBtn.textContent = 'Calculate 1RM';
         return;
       }
 
@@ -129,6 +153,10 @@
         <p><strong>Estimated 1RM:</strong> ${oneRM.toFixed(1)} lbs</p>
         ${comparison ? `<p><strong>Comparison:</strong> ${comparison}</p>` : ''}
       `;
+
+      // Re-enable button
+      calcBtn.disabled = false;
+      calcBtn.textContent = 'Calculate 1RM';
     }
   </script>
 </body>
